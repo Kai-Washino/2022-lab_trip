@@ -79,6 +79,7 @@ def main():
     plot_world_landmark = args.plot_world_landmark
 
     # ゲーム準備 ###############################################################
+    global basuket_position
     BLACK = (0, 0, 0)
     RED = (255, 0, 0)
     WHITE = (255, 255, 255)
@@ -87,13 +88,17 @@ def main():
     screen = pygame.display.set_mode((700, 480))
     myclock = pygame.time.Clock()
     
-    flag=0
     x_paddle=250
-    x_ball = 10
-    y_ball = 10
-    vector_x = 5
-    vector_y = 5
+
+
     score = 0
+    BALLSIZE = 30
+    BALLSPEED = 5
+    BALLQUANTITY = 2
+    ball_array = []
+    for i in range(BALLQUANTITY):
+        ball_array.append([[10, 10], [10, 10]])
+    #ball_array[ボールの番号][ボールのベクトル，ボールの位置][x,y]
 
     # カメラ準備 ###############################################################
     cap = cv.VideoCapture(cap_device)
@@ -244,28 +249,45 @@ def main():
         rect = pygame.Rect(x_paddle, 400, 100, 30)
         pygame.draw.rect(screen, RED, rect)
         
+        # 障害物を描画
+
+        ball_array = make_obstacle(240, 300, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
+        ball_array = make_obstacle(210, 200, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
+        ball_array = make_obstacle(110, 350, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
+        ball_array = make_obstacle(610, 220, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
+        ball_array = make_obstacle(580, 320, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
+
         #ボールを描画
-        if(y_ball==390 and x_ball>=(x_paddle-5) and x_ball<=(x_paddle+95)):
-            vector_y = -5
-            score += 1
-        if(y_ball>=500):
-            x_ball = random.randrange(700)
-            y_ball = 10
-            vector_x = 5 * (random.randrange(0, 3, 2) - 1)
-            vector_y = 5
-            score=0
-        if(y_ball<=0): vector_y = 5 
-        if(x_ball>=700): vector_x = -5
-        if(x_ball<=0): vector_x = 5
-        x_ball += vector_x
-        y_ball += vector_y
-        pygame.draw.circle(screen, WHITE, (x_ball, y_ball), 10)
-        
+
+        #当たり判定
+        for i in range(BALLQUANTITY):
+            if(ball_array[i][1][1]==390 and ball_array[i][1][0]>=(x_paddle-5) and ball_array[i][1][0]<=(x_paddle+95)):
+                ball_array[i][1][0] = random.randrange(700)
+                ball_array[i][1][1] = 10
+                ball_array[i][0][0] = BALLSPEED * (random.randrange(0, 3, 2) - 1)
+                ball_array[i][0][1] = BALLSPEED
+                score += 1
+
+            #終了判定
+            if(ball_array[i][1][1]>500):
+                ball_array[i][1][0] = random.randrange(700)
+                ball_array[i][1][1] = 10
+                ball_array[i][0][0] = BALLSPEED* (random.randrange(0, 3, 2) - 1)
+                ball_array[i][0][1] = BALLSPEED
+
+            #壁に反射
+            if(ball_array[i][1][0]>=700): ball_array[i][0][0] = -BALLSPEED
+            if(ball_array[i][1][0]<=0): ball_array[i][0][0] = BALLSPEED
+            if(ball_array[i][1][1]<=0): ball_array[i][0][1] = BALLSPEED
+            ball_array[i][1][0] += ball_array[i][0][0]
+            ball_array[i][1][1] += ball_array[i][0][1]
+            pygame.draw.circle(screen, WHITE, (ball_array[i][1][0], ball_array[i][1][1]), BALLSIZE)
+    
         #スコアを表示
         font = pygame.font.SysFont(None, 80)
         score_text = font.render(str(score), True, (0,255,255))
         screen.blit(score_text, (630,10))
-        
+    
         pygame.display.flip()
         myclock.tick(60)
 
@@ -606,6 +628,7 @@ def draw_pose_landmarks(
     visibility_th=0.5,
 ):
     global basuket_position
+    basuket_position = [100, 100]
     image_width, image_height = image.shape[1], image.shape[0]
 
     landmark_point = []
@@ -939,6 +962,17 @@ def draw_bounding_rect(use_brect, image, brect):
 
     return image
 
+def make_obstacle(x_place, y_place, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY):
+  pygame.draw.circle(screen, WHITE, (x_place,y_place), 10)
+  for i in range(BALLQUANTITY):
+    if(ball_array[i][1][1] < y_place + BALLSIZE and ball_array[i][1][1] > y_place - BALLSIZE  and ball_array[i][1][0] <  x_place + BALLSIZE  and ball_array[i][1][0] >  x_place - BALLSIZE ):
+      if(ball_array[i][1][1] < y_place - BALLSIZE + 15 or ball_array[i][1][1] > y_place + BALLSIZE - 15):
+        ball_array[i][0][1] = ball_array[i][0][1] * -1
+        print("yが変わった")
+      else:
+        ball_array[i][0][0] = ball_array[i][0][0] * -1
+        print("xが変わった")
+  return ball_array
 
 if __name__ == '__main__':
     main()
