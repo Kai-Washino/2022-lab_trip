@@ -122,7 +122,9 @@ def main():
     RED = (255, 0, 0)
     WHITE = (255, 255, 255)
     PINK = (234, 147, 149)
+    GLAY = (125, 125, 125)
     BODYCOLOR = PINK
+
 
     pygame.init()
     screen = pygame.display.set_mode((700, 480), pygame.FULLSCREEN)
@@ -130,11 +132,13 @@ def main():
     pygame.mixer.init(frequency = 44100)    # 初期設定
     bound = pygame.mixer.Sound("materials//ビヨォン.wav")
 
-    tsukamoto_goal = pygame.mixer.Sound("materials//tsukamoto_goal.wav")
-    terada_goal = pygame.mixer.Sound("materials//terada_goal.wav")
-    ohnishi_goal = pygame.mixer.Sound("materials//ohnishi_goal.wav")
-    tsuchida_goal = pygame.mixer.Sound("materials//tsuchida_goal.wav")
+    tsukamoto_goal = pygame.mixer.Sound("materials//tsukamoto.wav")
+    terada_goal = pygame.mixer.Sound("materials//terada.wav")
+    ohnishi_goal = pygame.mixer.Sound("materials//ohnishi.wav")
+    tsuchida_goal = pygame.mixer.Sound("materials//tsuchida.wav")
     gold_goal = pygame.mixer.Sound("materials//gold_goal.wav")
+    fever_sound = pygame.mixer.Sound("materials//fever.wav")
+    feverend_sound = pygame.mixer.Sound("materials//feverend.wav")
 
     tsukamoto = pygame.image.load("materials//tsukamoto.png")
     terada = pygame.image.load("materials//terada.png")
@@ -272,13 +276,15 @@ def main():
             # フィーバータイム
             fever_time = time.time() - fever_start
             if(fever_time < 3):
-                screen.blit(fever, (100, 100))
+                screen.blit(fever, (100, 0))
+                fever_sound.play(0)
                 temp = BALLQUANTITY
                 BALLQUANTITY = 50
                 for i in range(BALLQUANTITY - temp):
                     ball_array.append([[10, 10], [10, 10], [ohnishi, ohnishi_goal]])
             elif(fever_time > 18):
                 screen.blit(feverend, (100, 100))
+                feverend_sound.play(0)
                 BALLQUANTITY = 2
                 if(fever_time > 21):
                     fever_flag = False
@@ -295,7 +301,7 @@ def main():
             for i in range(len(body_position)):
                 body_position[i][0] = body_position[i][0] * 0.2
                 body_position[i][1] = body_position[i][1] * 0.2
-                body_position[i][1] = body_position[i][1] + 300
+                body_position[i][1] = body_position[i][1] + 500
 
             for i in range(len(body_position)-1):
                 body_position[i+1][0] = body_position[i+1][0] - body_position[0][0]
@@ -355,7 +361,7 @@ def main():
                     ball_array[i][0][0] = BALLSPEED * (random.randrange(0, 3, 2) - 1)
                     ball_array[i][0][1] = BALLSPEED
 
-                    if(ball_count % 3 == 0 and not fever_flag):
+                    if(ball_count % 50 == 0 and not fever_flag):
                         ball_array[i][2][0] = gold
                         ball_array[i][2][1] = gold_goal
                     elif(ball_count % 20 == 0):
@@ -374,12 +380,12 @@ def main():
                 # 終了判定
                 if(ball_array[i][1][1] > 500):
                     ball_array[i][1][0] = random.randrange(700)
-                    ball_array[i][1][1] = 10
+                    ball_array[i][1][1] = 90
                     ball_array[i][0][0] = BALLSPEED * (random.randrange(0, 3, 2) - 1)
                     ball_array[i][0][1] = BALLSPEED
                     ball_count += 1
 
-                    if(ball_count % 3 == 0 and not fever_flag):
+                    if(ball_count % 50 == 0 and not fever_flag):
                         ball_array[i][2][0] = gold
                         ball_array[i][2][1] = gold_goal
                     elif(ball_count % 20 == 0):
@@ -402,7 +408,7 @@ def main():
                 if(ball_array[i][1][0] <= 0): 
                     ball_array[i][0][0] = BALLSPEED
                     bound.play(0)
-                if(ball_array[i][1][1] <= 0):
+                if(ball_array[i][1][1] <= 80):
                     ball_array[i][0][1] = BALLSPEED
                     bound.play(0)
                 ball_array[i][1][0] += ball_array[i][0][0]
@@ -411,13 +417,17 @@ def main():
 
                 screen.blit(ball_array[i][2][0], (ball_array[i][1][0] - BALLSIZE, ball_array[i][1][1] - BALLSIZE))
 
+            
+            rect = pygame.Rect(0, 0, 1000, 80)
+            pygame.draw.rect(screen, GLAY, rect)
+
             # スコアを表示
             score_text = font.render("score " + str(score), True, (0, 255, 255))
-            screen.blit(score_text, (470, 50))
+            screen.blit(score_text, (500, 10))
 
             # 残り時間を表示
             time_text = font.render("time " + str(rest_time), True, (0, 255, 255))
-            screen.blit(time_text, (470, 10))
+            screen.blit(time_text, (50, 10))
 
         pygame.display.flip()
         myclock.tick(60)
