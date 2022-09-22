@@ -161,7 +161,8 @@ def main():
     # ball_array[ボールの番号][ボールの画像の名前，ボールのベクトル，ボールの位置][x,y もしくは画像，音]
     
     # カメラ準備 ###############################################################
-    cap = cv.VideoCapture(cap_device)
+    cap = cv.VideoCapture(1, cv.CAP_DSHOW)
+    print(cap_device)
     cap.set(cv.CAP_PROP_FRAME_WIDTH, cap_width)
     cap.set(cv.CAP_PROP_FRAME_HEIGHT, cap_height)
 
@@ -324,6 +325,14 @@ def main():
             ball_array = make_obstacle(110, 350, ball_array, screen, WHITE, BALLSIZE, BALLQUANTITY)
             ball_array = make_obstacle(610, 220, ball_array, screen, WHITE, BALLSIZE, BALLQUANTITY)
             ball_array = make_obstacle(580, 320, ball_array, screen, WHITE, BALLSIZE, BALLQUANTITY)
+
+            #ボール同士の当たり
+            for i in range(BALLQUANTITY-1):
+                for j in range(BALLQUANTITY-2-i):
+                    distance = abs(ball_array[i][1][1] - ball_array[i+j+1][1][1]) + abs(ball_array[i][1][0] - ball_array[i+j+1][1][0])
+                    if(distance < 100):
+                        ball_array[i][0][0] = -ball_array[i][0][0]
+                        ball_array[i+j+1][0][0] = -ball_array[i+j+1][0][0]
 
             # 当たり判定
             for i in range(BALLQUANTITY):
