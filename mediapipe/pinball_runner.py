@@ -125,6 +125,8 @@ def main():
     BLACK = (0, 0, 0)
     RED = (255, 0, 0)
     WHITE = (255, 255, 255)
+    PINK = (234, 147, 149)
+    BODYCOLOR = PINK
 
     pygame.init()
     screen = pygame.display.set_mode((700, 480), pygame.FULLSCREEN)
@@ -288,12 +290,6 @@ def main():
             score_text = font_big.render("score " + str(score), True, (0,255,255))
             screen.blit(score_text, (200,100))
         else:
-            
-            #パドルを描画
-            x_paddle = nose_position[0]
-            rect = pygame.Rect(x_paddle, 400, 100, 30)
-            pygame.draw.rect(screen, RED, rect)
-
             left_top = [left_shoulder,left_elbow, left_hand]
             right_top = [right_shoulder,right_elbow, right_hand]
             left_bottom = [left_waist, left_knee, left_ankle]
@@ -301,22 +297,33 @@ def main():
             body_position = [nose_position] + left_top + right_top + left_bottom + right_bottom
             body_position = list(body_position)
             for i in range(len(body_position)):
-                body_position[i][0] = body_position[i][0]*0.2
-                body_position[i][1] = body_position[i][1]*0.2
+                body_position[i][0] = body_position[i][0]*0.2 
+                body_position[i][1] = body_position[i][1]*0.2 
                 body_position[i][1] = body_position[i][1] + 300
 
-            pygame.draw.line(screen, RED, body_position[0], body_position[1], 3)
-            pygame.draw.line(screen, RED, body_position[0], body_position[4], 3)
-            pygame.draw.line(screen, RED, body_position[1], body_position[7], 3)
-            pygame.draw.line(screen, RED, body_position[4], body_position[10], 3)
+            for i in range(len(body_position)-1):
+                body_position[i+1][0] = body_position[i+1][0] - body_position[0][0]
+                body_position[i+1][1] = body_position[i+1][1] - body_position[0][1]
+            body_position[0][0] = body_position[0][0]*5
+            for i in range(len(body_position)-1):
+                body_position[i+1][0] = body_position[i+1][0] + body_position[0][0]
+                body_position[i+1][1] = body_position[i+1][1] + body_position[0][1]
+            pygame.draw.line(screen, BODYCOLOR, body_position[0], body_position[1], 3)
+            pygame.draw.line(screen, BODYCOLOR, body_position[0], body_position[4], 3)
+            pygame.draw.line(screen, BODYCOLOR, body_position[1], body_position[7], 3)
+            pygame.draw.line(screen, BODYCOLOR, body_position[4], body_position[10], 3)
 
             for i in range(2):
-                pygame.draw.line(screen, RED, body_position[i+1], body_position[i+2], 3)
-                pygame.draw.line(screen, RED, body_position[i+4], body_position[i+5], 3)
-                pygame.draw.line(screen, RED, body_position[i+7], body_position[i+8], 3)
-                pygame.draw.line(screen, RED, body_position[i+10], body_position[i+11], 3)
-
+                pygame.draw.line(screen, BODYCOLOR, body_position[i+1], body_position[i+2], 3)
+                pygame.draw.line(screen, BODYCOLOR, body_position[i+4], body_position[i+5], 3)
+                pygame.draw.line(screen, BODYCOLOR, body_position[i+7], body_position[i+8], 3)
+                pygame.draw.line(screen, BODYCOLOR, body_position[i+10], body_position[i+11], 3)
             
+            #パドルを描画
+            x_paddle = body_position[0][0]-50
+            rect = pygame.Rect(x_paddle, body_position[0][1]-30, 100, 30)
+            pygame.draw.rect(screen, BODYCOLOR, rect)
+        
             # 障害物を描画
 
             ball_array = make_obstacle(240, 300, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
