@@ -130,7 +130,4 @@ dmypy.json
 
 # bat
 *.bat
-
-*.jpg
-*.png
 *.mp4
