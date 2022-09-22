@@ -321,11 +321,11 @@ def main():
             
             #パドルを描画
             x_paddle = body_position[0][0]-50
-            rect = pygame.Rect(x_paddle, body_position[0][1]-30, 100, 30)
+            y_paddle = body_position[0][1]-30
+            rect = pygame.Rect(x_paddle, y_paddle, 100, 30)
             pygame.draw.rect(screen, BODYCOLOR, rect)
         
             # 障害物を描画
-
             ball_array = make_obstacle(240, 300, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
             ball_array = make_obstacle(210, 200, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
             ball_array = make_obstacle(110, 350, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
@@ -334,7 +334,7 @@ def main():
 
             #当たり判定
             for i in range(BALLQUANTITY):
-                if(ball_array[i][1][1]==390 and ball_array[i][1][0]>=(x_paddle-10) and ball_array[i][1][0]<=(x_paddle+95)):
+                if(ball_array[i][1][1]-30 < y_paddle and (ball_array[i][1][1]+30)+30 > y_paddle and ball_array[i][1][0] + 30 >= (x_paddle-10) and ball_array[i][1][0] - 30 <=(x_paddle+115)):
                     ball_count += 1
                     ball_array[i][2][1].play(0)
 
