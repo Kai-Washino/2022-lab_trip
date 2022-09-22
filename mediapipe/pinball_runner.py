@@ -144,15 +144,15 @@ def main():
     tsuchida = pygame.image.load("materials//tsuchida.png")
     gold = pygame.image.load("materials//gold.png")
     fever = pygame.image.load("materials//fever.jpg")
-    feverend = pygame.image.load("materials//feverend.jpg")
+    feverend = pygame.image.load("materials//feverend.png")
     x_paddle = 250
 
     font = pygame.font.SysFont(None, 80)
-    font_big = pygame.font.SysFont(None, 200)
+    font_big = pygame.font.SysFont(None, 150)
 
     score = 0
     BALLSIZE = 30
-    BALLSPEED = 10
+    BALLSPEED = 5
     BALLQUANTITY = 2
     TIMELIMIT = 90
     ball_count = 0
@@ -166,7 +166,6 @@ def main():
     
     # カメラ準備 ###############################################################
     cap = cv.VideoCapture(1, cv.CAP_DSHOW)
-    print(cap_device)
     cap.set(cv.CAP_PROP_FRAME_WIDTH, cap_width)
     cap.set(cv.CAP_PROP_FRAME_HEIGHT, cap_height)
 
@@ -200,7 +199,7 @@ def main():
         ret, image = cap.read()
         if not ret:
             break
-        image = cv.flip(image, 1)  # ミラー表示
+        # image = cv.flip(image, 1)  # ミラー表示
         debug_image = copy.deepcopy(image)
 
         # 検出実施 #############################################################
@@ -289,6 +288,13 @@ def main():
         elif(rest_time <= 0):
             score_text = font_big.render("score " + str(score), True, (0, 255, 255))
             screen.blit(score_text, (200, 100))
+            if(press[pygame.K_SPACE]):
+                starttime = time.time()
+                score = 0
+                ball_count = 0
+                BALLQUANTITY = 2
+                game_start = True
+
         else:
             left_top = [left_shoulder, left_elbow, left_hand]
             right_top = [right_shoulder, right_elbow, right_hand]
@@ -299,12 +305,12 @@ def main():
             for i in range(len(body_position)):
                 body_position[i][0] = body_position[i][0] * 0.2
                 body_position[i][1] = body_position[i][1] * 0.2
-                body_position[i][1] = body_position[i][1] + 500
+                body_position[i][1] = body_position[i][1] + 400
 
             for i in range(len(body_position)-1):
                 body_position[i+1][0] = body_position[i+1][0] - body_position[0][0]
                 body_position[i+1][1] = body_position[i+1][1] - body_position[0][1]
-            body_position[0][0] = body_position[0][0]*5
+            body_position[0][0] = body_position[0][0] * 4
             for i in range(len(body_position)-1):
                 body_position[i+1][0] = body_position[i+1][0] + body_position[0][0]
                 body_position[i+1][1] = body_position[i+1][1] + body_position[0][1]
@@ -359,13 +365,13 @@ def main():
                     ball_array[i][0][0] = BALLSPEED * (random.randrange(0, 3, 2) - 1)
                     ball_array[i][0][1] = BALLSPEED
 
-                    if(ball_count % 50 == 0 and not fever_flag):
+                    if(rest_time <= 30 and ball_count % 10 == 0 and not fever_flag):
                         ball_array[i][2][0] = gold
                         ball_array[i][2][1] = gold_goal
-                    elif(ball_count % 20 == 0):
+                    elif(ball_count % 15 == 0):
                         ball_array[i][2][0] = tsukamoto
                         ball_array[i][2][1] = tsukamoto_goal
-                    elif(ball_count % 15 == 0):
+                    elif(ball_count % 10 == 0):
                         ball_array[i][2][0] = terada
                         ball_array[i][2][1] = terada_goal
                     elif(ball_count % 2 == 0):
@@ -383,13 +389,13 @@ def main():
                     ball_array[i][0][1] = BALLSPEED
                     ball_count += 1
 
-                    if(ball_count % 50 == 0 and not fever_flag):
+                    if(rest_time <= 30 and ball_count % 10 == 0 and not fever_flag):
                         ball_array[i][2][0] = gold
                         ball_array[i][2][1] = gold_goal
-                    elif(ball_count % 20 == 0):
+                    elif(ball_count % 15 == 0):
                         ball_array[i][2][0] = tsukamoto
                         ball_array[i][2][1] = tsukamoto_goal
-                    elif(ball_count % 15 == 0):
+                    elif(ball_count % 10 == 0):
                         ball_array[i][2][0] = terada
                         ball_array[i][2][1] = terada_goal
                     elif(ball_count % 2 == 0):
