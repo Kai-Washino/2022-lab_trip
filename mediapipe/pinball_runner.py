@@ -33,9 +33,6 @@ global right_ankle
 global left_ankle
 
 
- 
-
-
 def get_args():
     parser = argparse.ArgumentParser()
 
@@ -76,7 +73,7 @@ def main():
     # 引数解析 #################################################################
     args = get_args()
 
-    cap_device = args.device
+    cap_device = 1
     cap_width = args.width
     cap_height = args.height
 
@@ -121,7 +118,6 @@ def main():
     right_ankle = [0, 0]
     left_ankle = [0, 0]
 
-
     BLACK = (0, 0, 0)
     RED = (255, 0, 0)
     WHITE = (255, 255, 255)
@@ -147,8 +143,7 @@ def main():
     gold = pygame.image.load("materials//gold.png")
     fever = pygame.image.load("materials//fever.jpg")
     feverend = pygame.image.load("materials//feverend.jpg")
-    
-    x_paddle=250
+    x_paddle = 250
 
     font = pygame.font.SysFont(None, 80)
     font_big = pygame.font.SysFont(None, 200)
@@ -165,7 +160,7 @@ def main():
 
     for i in range(BALLQUANTITY):
         ball_array.append([[10, 10], [10, 10], [ohnishi, ohnishi_goal]])
-    #ball_array[ボールの番号][ボールの画像の名前，ボールのベクトル，ボールの位置][x,y もしくは画像，音]
+    # ball_array[ボールの番号][ボールの画像の名前，ボールのベクトル，ボールの位置][x,y もしくは画像，音]
     
     # カメラ準備 ###############################################################
     cap = cv.VideoCapture(cap_device)
@@ -178,8 +173,8 @@ def main():
         # upper_body_only=upper_body_only,
         model_complexity=model_complexity,
         smooth_landmarks=smooth_landmarks,
-        #enable_segmentation=enable_segmentation,    ###
-        #smooth_segmentation=smooth_segmentation,    ###
+        # enable_segmentation=enable_segmentation,    ###
+        # smooth_segmentation=smooth_segmentation,    ###
         min_detection_confidence=min_detection_confidence,
         min_tracking_confidence=min_tracking_confidence,
     )
@@ -190,7 +185,6 @@ def main():
     # World座標プロット ########################################################
     if plot_world_landmark:
         import matplotlib.pyplot as plt
-        
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
         fig.subplots_adjust(left=0.0, right=1, bottom=0, top=1)
@@ -265,21 +259,22 @@ def main():
 
         # ゲーム ###############################################################
         for event in pygame.event.get():
-            if event.type==pygame.QUIT: flag=1
+            if event.type == pygame.QUIT:
+                flag = 1
         rest_time = int(TIMELIMIT - time.time() + starttime)
         screen.fill(BLACK)
         if(not game_start):
             starttime = time.time()
-            score_text = font_big.render("SPACE", True, (0,255,255))
-            screen.blit(score_text, (200,100))
-        
-        elif(fever_flag and  (time.time() - fever_start < 3 or time.time() - fever_start > 18)): #フィーバータイム
+            score_text = font_big.render("SPACE", True, (0, 255, 255))
+            screen.blit(score_text, (200, 100))
+        elif(fever_flag and (time.time() - fever_start < 3 or time.time() - fever_start > 18)):
+            # フィーバータイム
             fever_time = time.time() - fever_start
             if(fever_time < 3):
                 screen.blit(fever, (100, 100))
                 temp = BALLQUANTITY
                 BALLQUANTITY = 50
-                for i in range(BALLQUANTITY- temp):
+                for i in range(BALLQUANTITY - temp):
                     ball_array.append([[10, 10], [10, 10], [ohnishi, ohnishi_goal]])
             elif(fever_time > 18):
                 screen.blit(feverend, (100, 100))
@@ -287,18 +282,18 @@ def main():
                 if(fever_time > 21):
                     fever_flag = False
         elif(rest_time <= 0):
-            score_text = font_big.render("score " + str(score), True, (0,255,255))
-            screen.blit(score_text, (200,100))
+            score_text = font_big.render("score " + str(score), True, (0, 255, 255))
+            screen.blit(score_text, (200, 100))
         else:
-            left_top = [left_shoulder,left_elbow, left_hand]
-            right_top = [right_shoulder,right_elbow, right_hand]
+            left_top = [left_shoulder, left_elbow, left_hand]
+            right_top = [right_shoulder, right_elbow, right_hand]
             left_bottom = [left_waist, left_knee, left_ankle]
             right_bottom = [right_waist, right_knee, right_ankle]
             body_position = [nose_position] + left_top + right_top + left_bottom + right_bottom
             body_position = list(body_position)
             for i in range(len(body_position)):
-                body_position[i][0] = body_position[i][0]*0.2 
-                body_position[i][1] = body_position[i][1]*0.2 
+                body_position[i][0] = body_position[i][0] * 0.2
+                body_position[i][1] = body_position[i][1] * 0.2
                 body_position[i][1] = body_position[i][1] + 300
 
             for i in range(len(body_position)-1):
@@ -326,13 +321,13 @@ def main():
             pygame.draw.rect(screen, BODYCOLOR, rect)
         
             # 障害物を描画
-            ball_array = make_obstacle(240, 300, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
-            ball_array = make_obstacle(210, 200, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
-            ball_array = make_obstacle(110, 350, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
-            ball_array = make_obstacle(610, 220, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
-            ball_array = make_obstacle(580, 320, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY)
+            ball_array = make_obstacle(240, 300, ball_array, screen, WHITE, BALLSIZE, BALLQUANTITY)
+            ball_array = make_obstacle(210, 200, ball_array, screen, WHITE, BALLSIZE, BALLQUANTITY)
+            ball_array = make_obstacle(110, 350, ball_array, screen, WHITE, BALLSIZE, BALLQUANTITY)
+            ball_array = make_obstacle(610, 220, ball_array, screen, WHITE, BALLSIZE, BALLQUANTITY)
+            ball_array = make_obstacle(580, 320, ball_array, screen, WHITE, BALLSIZE, BALLQUANTITY)
 
-            #当たり判定
+            # 当たり判定
             for i in range(BALLQUANTITY):
                 if(ball_array[i][1][1]-30 < y_paddle and (ball_array[i][1][1]+30)+30 > y_paddle and ball_array[i][1][0] + 30 >= (x_paddle-10) and ball_array[i][1][0] - 30 <=(x_paddle+115)):
                     ball_count += 1
@@ -350,57 +345,55 @@ def main():
                     ball_array[i][1][1] = 10
                     ball_array[i][0][0] = BALLSPEED * (random.randrange(0, 3, 2) - 1)
                     ball_array[i][0][1] = BALLSPEED
-                    
 
-                    if(ball_count%3 == 0 and not fever_flag):
+                    if(ball_count % 3 == 0 and not fever_flag):
                         ball_array[i][2][0] = gold
                         ball_array[i][2][1] = gold_goal
-                    elif(ball_count%20 ==0):
+                    elif(ball_count % 20 == 0):
                         ball_array[i][2][0] = tsukamoto
                         ball_array[i][2][1] = tsukamoto_goal
-                    elif(ball_count%15 ==0):
+                    elif(ball_count % 15 == 0):
                         ball_array[i][2][0] = terada
                         ball_array[i][2][1] = terada_goal
-                    elif(ball_count%2 ==0):
+                    elif(ball_count % 2 == 0):
                         ball_array[i][2][0] = ohnishi
                         ball_array[i][2][1] = ohnishi_goal
                     else:
                         ball_array[i][2][0] = tsuchida
                         ball_array[i][2][1] = tsuchida_goal
-                    
 
-                #終了判定
-                if(ball_array[i][1][1]>500):
+                # 終了判定
+                if(ball_array[i][1][1] > 500):
                     ball_array[i][1][0] = random.randrange(700)
                     ball_array[i][1][1] = 10
-                    ball_array[i][0][0] = BALLSPEED* (random.randrange(0, 3, 2) - 1)
+                    ball_array[i][0][0] = BALLSPEED * (random.randrange(0, 3, 2) - 1)
                     ball_array[i][0][1] = BALLSPEED
                     ball_count += 1
 
-                    if(ball_count%3 ==0 and not fever_flag):
+                    if(ball_count % 3 == 0 and not fever_flag):
                         ball_array[i][2][0] = gold
                         ball_array[i][2][1] = gold_goal
-                    elif(ball_count%20 ==0):
+                    elif(ball_count % 20 == 0):
                         ball_array[i][2][0] = tsukamoto
                         ball_array[i][2][1] = tsukamoto_goal
-                    elif(ball_count%15 ==0):
+                    elif(ball_count % 15 == 0):
                         ball_array[i][2][0] = terada
                         ball_array[i][2][1] = terada_goal
-                    elif(ball_count%2 ==0):
+                    elif(ball_count % 2 == 0):
                         ball_array[i][2][0] = ohnishi
                         ball_array[i][2][1] = ohnishi_goal
                     else:
                         ball_array[i][2][0] = tsuchida
                         ball_array[i][2][1] = tsuchida_goal
 
-                #壁に反射
-                if(ball_array[i][1][0]>=700): 
+                # 壁に反射
+                if(ball_array[i][1][0] >= 700): 
                     ball_array[i][0][0] = -BALLSPEED
                     bound.play(0)
-                if(ball_array[i][1][0]<=0): 
+                if(ball_array[i][1][0] <= 0): 
                     ball_array[i][0][0] = BALLSPEED
                     bound.play(0)
-                if(ball_array[i][1][1]<=0):
+                if(ball_array[i][1][1] <= 0):
                     ball_array[i][0][1] = BALLSPEED
                     bound.play(0)
                 ball_array[i][1][0] += ball_array[i][0][0]
@@ -408,24 +401,20 @@ def main():
                 # pygame.draw.circle(screen, WHITE, (ball_array[i][1][0], ball_array[i][1][1]), BALLSIZE)
 
                 screen.blit(ball_array[i][2][0], (ball_array[i][1][0] - BALLSIZE, ball_array[i][1][1] - BALLSIZE))
-    
-            #スコアを表示
-            score_text = font.render("score " + str(score), True, (0,255,255))
-            screen.blit(score_text, (470,50))
 
-            #残り時間を表示
-            time_text = font.render("time " + str(rest_time), True, (0,255,255))
-            screen.blit(time_text, (470,10))
+            # スコアを表示
+            score_text = font.render("score " + str(score), True, (0, 255, 255))
+            screen.blit(score_text, (470, 50))
+
+            # 残り時間を表示
+            time_text = font.render("time " + str(rest_time), True, (0, 255, 255))
+            screen.blit(time_text, (470, 10))
 
         pygame.display.flip()
         myclock.tick(60)
 
-    
-
-
     cap.release()
     cv.destroyAllWindows()
-            
 
 
 def calc_bounding_rect(image, landmarks):
@@ -444,8 +433,6 @@ def calc_bounding_rect(image, landmarks):
     x, y, w, h = cv.boundingRect(landmark_array)
 
     return [x, y, x + w, y + h]
-
-
 
 
 def draw_face_landmarks(image, landmarks):
@@ -645,16 +632,16 @@ def draw_pose_landmarks(
             left_shoulder = [int(landmark_x), int(landmark_y)]
         if index == 13:  # 右肘
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            right_elbow  = [int(landmark_x), int(landmark_y)]
+            right_elbow = [int(landmark_x), int(landmark_y)]
         if index == 14:  # 左肘
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            left_elbow  = [int(landmark_x), int(landmark_y)]
+            left_elbow = [int(landmark_x), int(landmark_y)]
         if index == 15:  # 右手首
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            right_hand  = [int(landmark_x), int(landmark_y)]
+            right_hand = [int(landmark_x), int(landmark_y)]
         if index == 16:  # 左手首
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            left_hand  = [int(landmark_x), int(landmark_y)]
+            left_hand = [int(landmark_x), int(landmark_y)]
         if index == 17:  # 右手1(外側端)
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
         if index == 18:  # 左手1(外側端)
@@ -669,22 +656,22 @@ def draw_pose_landmarks(
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
         if index == 23:  # 腰(右側)
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            right_waist  = [int(landmark_x), int(landmark_y)]
+            right_waist = [int(landmark_x), int(landmark_y)]
         if index == 24:  # 腰(左側)
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            left_waist  = [int(landmark_x), int(landmark_y)]
+            left_waist = [int(landmark_x), int(landmark_y)]
         if index == 25:  # 右ひざ
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            right_knee  = [int(landmark_x), int(landmark_y)]
+            right_knee = [int(landmark_x), int(landmark_y)]
         if index == 26:  # 左ひざ
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            left_knee  = [int(landmark_x), int(landmark_y)]
+            left_knee = [int(landmark_x), int(landmark_y)]
         if index == 27:  # 右足首
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            right_ankle  = [int(landmark_x), int(landmark_y)]
+            right_ankle = [int(landmark_x), int(landmark_y)]
         if index == 28:  # 左足首
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            left_ankle  = [int(landmark_x), int(landmark_y)]
+            left_ankle = [int(landmark_x), int(landmark_y)]
         if index == 29:  # 右かかと
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
         if index == 30:  # 左かかと
@@ -918,7 +905,7 @@ def plot_world_landmarks(
         waist_x.append(point[0])
         waist_y.append(point[2])
         waist_z.append(point[1] * (-1))
-            
+
     ax.cla()
     ax.set_xlim3d(-1, 1)
     ax.set_ylim3d(-1, 1)
@@ -931,7 +918,7 @@ def plot_world_landmarks(
     ax.plot(left_body_side_x, left_body_side_y, left_body_side_z)
     ax.plot(shoulder_x, shoulder_y, shoulder_z)
     ax.plot(waist_x, waist_y, waist_z)
-    
+
     plt.pause(.001)
 
     return
@@ -945,15 +932,17 @@ def draw_bounding_rect(use_brect, image, brect):
 
     return image
 
-def make_obstacle(x_place, y_place, ball_array, screen, WHITE,BALLSIZE, BALLQUANTITY):
-  pygame.draw.circle(screen, WHITE, (x_place,y_place), 10)
-  for i in range(BALLQUANTITY):
-    if(ball_array[i][1][1] < y_place + BALLSIZE and ball_array[i][1][1] > y_place - BALLSIZE  and ball_array[i][1][0] <  x_place + BALLSIZE  and ball_array[i][1][0] >  x_place - BALLSIZE ):
-      if(ball_array[i][1][1] < y_place - BALLSIZE + 15 or ball_array[i][1][1] > y_place + BALLSIZE - 15):
-        ball_array[i][0][1] = ball_array[i][0][1] * -1
-      else:
-        ball_array[i][0][0] = ball_array[i][0][0] * -1
-  return ball_array
+
+def make_obstacle(x_place, y_place, ball_array, screen, WHITE, BALLSIZE, BALLQUANTITY):
+    pygame.draw.circle(screen, WHITE, (x_place, y_place), 10)
+    for i in range(BALLQUANTITY):
+        if(ball_array[i][1][1] < y_place + BALLSIZE and ball_array[i][1][1] > y_place - BALLSIZE and ball_array[i][1][0] < x_place + BALLSIZE and ball_array[i][1][0] > x_place - BALLSIZE):
+            if(ball_array[i][1][1] < y_place - BALLSIZE + 15 or ball_array[i][1][1] > y_place + BALLSIZE - 15):
+                ball_array[i][0][1] = ball_array[i][0][1] * -1
+            else:
+                ball_array[i][0][0] = ball_array[i][0][0] * -1
+    return ball_array
+
 
 if __name__ == '__main__':
     main()
