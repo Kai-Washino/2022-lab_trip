@@ -14,10 +14,23 @@ from utils import CvFpsCalc
 from PIL import Image
 
 import pygame
+import sys
 import random
 import time
 
-global basuket_position
+global nose_position
+global left_shoulder
+global right_shoulder
+global right_elbow
+global left_elbow
+global right_hand
+global left_hand
+global right_waist
+global left_waist
+global right_knee
+global left_knee
+global right_ankle
+global left_ankle
 
 
  
@@ -80,13 +93,41 @@ def main():
     plot_world_landmark = args.plot_world_landmark
 
     # ゲーム準備 ###############################################################
-    global basuket_position
+    global nose_position
+    global left_shoulder
+    global right_shoulder
+    global right_elbow
+    global left_elbow
+    global right_hand
+    global left_hand
+    global right_waist
+    global left_waist
+    global right_knee
+    global left_knee
+    global right_ankle
+    global left_ankle
+
+    nose_position = [0, 0]
+    left_shoulder = [0, 0]
+    right_shoulder = [0, 0]
+    right_elbow = [0, 0]
+    left_elbow = [0, 0]
+    right_hand = [0, 0]
+    left_hand = [0, 0]
+    right_waist = [0, 0]
+    left_waist = [0, 0]
+    right_knee = [0, 0]
+    left_knee = [0, 0]
+    right_ankle = [0, 0]
+    left_ankle = [0, 0]
+
+
     BLACK = (0, 0, 0)
     RED = (255, 0, 0)
     WHITE = (255, 255, 255)
 
     pygame.init()
-    screen = pygame.display.set_mode((700, 480))
+    screen = pygame.display.set_mode((700, 480), pygame.FULLSCREEN)
     myclock = pygame.time.Clock()
     pygame.mixer.init(frequency = 44100)    # 初期設定
     bound = pygame.mixer.Sound("materials//ビヨォン.wav")
@@ -119,8 +160,6 @@ def main():
     ball_array = []
     fever_flag = False
     game_start = False
-    op_flag = False
-    ed_flag = False
 
     for i in range(BALLQUANTITY):
         ball_array.append([[10, 10], [10, 10], [ohnishi, ohnishi_goal]])
@@ -214,56 +253,14 @@ def main():
         # Hands ###############################################################
         left_hand_landmarks = results.left_hand_landmarks
         right_hand_landmarks = results.right_hand_landmarks
-        # 左手
-        if left_hand_landmarks is not None:
-            # 手の平重心計算
-            cx, cy = calc_palm_moment(debug_image, left_hand_landmarks)
-            # 外接矩形の計算
-            brect = calc_bounding_rect(debug_image, left_hand_landmarks)
-            # 描画
-            debug_image = draw_hands_landmarks(
-                debug_image,
-                cx,
-                cy,
-                left_hand_landmarks,
-                # upper_body_only,
-                'R',
-            )
-            debug_image = draw_bounding_rect(use_brect, debug_image, brect)
-        # 右手
-        if right_hand_landmarks is not None:
-            # 手の平重心計算
-            cx, cy = calc_palm_moment(debug_image, right_hand_landmarks)
-            # 外接矩形の計算
-            brect = calc_bounding_rect(debug_image, right_hand_landmarks)
-            # 描画
-            debug_image = draw_hands_landmarks(
-                debug_image,
-                cx,
-                cy,
-                right_hand_landmarks,
-                # upper_body_only,
-                'L',
-            )
-            debug_image = draw_bounding_rect(use_brect, debug_image, brect)
-
-        # FPS表示
-        if enable_segmentation and results.segmentation_mask is not None:
-            fps_color = (255, 255, 255)
-        else:
-            fps_color = (0, 255, 0)
-        cv.putText(debug_image, "FPS:" + str(display_fps), (10, 30),
-                   cv.FONT_HERSHEY_SIMPLEX, 1.0, fps_color, 2, cv.LINE_AA)
 
         # キー処理(ESC：終了) #################################################
-        key = cv.waitKey(1)
-        if key == 27:  # ESC
-            break
-        if key == 13:  # Enter
+        press = pygame.key.get_pressed()
+        if(press[pygame.K_SPACE]):
             game_start = True
-        # 画面反映 #############################################################
-        cv.imshow('MediaPipe Holistic Demo', debug_image)
-        print(fever_flag)
+        if(press[pygame.K_ESCAPE]):
+            break
+
         # ゲーム ###############################################################
         for event in pygame.event.get():
             if event.type==pygame.QUIT: flag=1
@@ -271,7 +268,7 @@ def main():
         screen.fill(BLACK)
         if(not game_start):
             starttime = time.time()
-            score_text = font_big.render("ENTER", True, (0,255,255))
+            score_text = font_big.render("SPACE", True, (0,255,255))
             screen.blit(score_text, (200,100))
         
         elif(fever_flag and  (time.time() - fever_start < 3 or time.time() - fever_start > 18)): #フィーバータイム
@@ -293,9 +290,32 @@ def main():
         else:
             
             #パドルを描画
-            x_paddle = basuket_position[0]
+            x_paddle = nose_position[0]
             rect = pygame.Rect(x_paddle, 400, 100, 30)
             pygame.draw.rect(screen, RED, rect)
+
+            left_top = [left_shoulder,left_elbow, left_hand]
+            right_top = [right_shoulder,right_elbow, right_hand]
+            left_bottom = [left_waist, left_knee, left_ankle]
+            right_bottom = [right_waist, right_knee, right_ankle]
+            body_position = [nose_position] + left_top + right_top + left_bottom + right_bottom
+            body_position = list(body_position)
+            for i in range(len(body_position)):
+                body_position[i][0] = body_position[i][0]*0.2
+                body_position[i][1] = body_position[i][1]*0.2
+                body_position[i][1] = body_position[i][1] + 300
+
+            pygame.draw.line(screen, RED, body_position[0], body_position[1], 3)
+            pygame.draw.line(screen, RED, body_position[0], body_position[4], 3)
+            pygame.draw.line(screen, RED, body_position[1], body_position[7], 3)
+            pygame.draw.line(screen, RED, body_position[4], body_position[10], 3)
+
+            for i in range(2):
+                pygame.draw.line(screen, RED, body_position[i+1], body_position[i+2], 3)
+                pygame.draw.line(screen, RED, body_position[i+4], body_position[i+5], 3)
+                pygame.draw.line(screen, RED, body_position[i+7], body_position[i+8], 3)
+                pygame.draw.line(screen, RED, body_position[i+10], body_position[i+11], 3)
+
             
             # 障害物を描画
 
@@ -309,7 +329,6 @@ def main():
             for i in range(BALLQUANTITY):
                 if(ball_array[i][1][1]==390 and ball_array[i][1][0]>=(x_paddle-10) and ball_array[i][1][0]<=(x_paddle+95)):
                     ball_count += 1
-                    print(ball_count)
                     ball_array[i][2][1].play(0)
 
                     if(ball_array[i][2][0] == gold and not fever_flag):
@@ -401,59 +420,6 @@ def main():
     cv.destroyAllWindows()
             
 
-def overlayImage(src, overlay, location):
-    overlay_height, overlay_width = overlay.shape[:2]
-
-    # 背景をPIL形式に変換
-    src = cv.cvtColor(src, cv.COLOR_BGR2RGB)
-    pil_src = Image.fromarray(src)
-    pil_src = pil_src.convert('RGBA')
-
-    # オーバーレイをPIL形式に変換
-    overlay = cv.cvtColor(overlay, cv.COLOR_BGRA2RGBA)
-    pil_overlay = Image.fromarray(overlay)
-    pil_overlay = pil_overlay.convert('RGBA')
-
-    # 画像を合成
-    pil_tmp = Image.new('RGBA', pil_src.size, (255, 255, 255, 0))
-    pil_tmp.paste(pil_overlay, location, pil_overlay)
-    result_image = Image.alpha_composite(pil_src, pil_tmp)
-
-    # OpenCV形式に変換
-    return cv.cvtColor(np.asarray(result_image), cv.COLOR_RGBA2BGRA)
-
-
-def calc_palm_moment(image, landmarks):
-    image_width, image_height = image.shape[1], image.shape[0]
-
-    palm_array = np.empty((0, 2), int)
-
-    for index, landmark in enumerate(landmarks.landmark):
-        landmark_x = min(int(landmark.x * image_width), image_width - 1)
-        landmark_y = min(int(landmark.y * image_height), image_height - 1)
-
-        landmark_point = [np.array((landmark_x, landmark_y))]
-
-        if index == 0:  # 手首1
-            palm_array = np.append(palm_array, landmark_point, axis=0)
-        if index == 1:  # 手首2
-            palm_array = np.append(palm_array, landmark_point, axis=0)
-        if index == 5:  # 人差指：付け根
-            palm_array = np.append(palm_array, landmark_point, axis=0)
-        if index == 9:  # 中指：付け根
-            palm_array = np.append(palm_array, landmark_point, axis=0)
-        if index == 13:  # 薬指：付け根
-            palm_array = np.append(palm_array, landmark_point, axis=0)
-        if index == 17:  # 小指：付け根
-            palm_array = np.append(palm_array, landmark_point, axis=0)
-    M = cv.moments(palm_array)
-    cx, cy = 0, 0
-    if M['m00'] != 0:
-        cx = int(M['m10'] / M['m00'])
-        cy = int(M['m01'] / M['m00'])
-
-    return cx, cy
-
 
 def calc_bounding_rect(image, landmarks):
     image_width, image_height = image.shape[1], image.shape[0]
@@ -473,125 +439,6 @@ def calc_bounding_rect(image, landmarks):
     return [x, y, x + w, y + h]
 
 
-def draw_hands_landmarks(
-        image,
-        cx,
-        cy,
-        landmarks,
-        # upper_body_only,
-        handedness_str='R'):
-    image_width, image_height = image.shape[1], image.shape[0]
-
-    landmark_point = []
-
-    # キーポイント
-    for index, landmark in enumerate(landmarks.landmark):
-        if landmark.visibility < 0 or landmark.presence < 0:
-            continue
-
-        landmark_x = min(int(landmark.x * image_width), image_width - 1)
-        landmark_y = min(int(landmark.y * image_height), image_height - 1)
-        landmark_z = landmark.z
-
-        landmark_point.append((landmark_x, landmark_y))
-
-        if index == 0:  # 手首1
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 1:  # 手首2
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 2:  # 親指：付け根
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 3:  # 親指：第1関節
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 4:  # 親指：指先
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            cv.circle(image, (landmark_x, landmark_y), 12, (0, 255, 0), 2)
-        if index == 5:  # 人差指：付け根
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 6:  # 人差指：第2関節
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 7:  # 人差指：第1関節
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 8:  # 人差指：指先
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            cv.circle(image, (landmark_x, landmark_y), 12, (0, 255, 0), 2)
-        if index == 9:  # 中指：付け根
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 10:  # 中指：第2関節
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 11:  # 中指：第1関節
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 12:  # 中指：指先
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            cv.circle(image, (landmark_x, landmark_y), 12, (0, 255, 0), 2)
-        if index == 13:  # 薬指：付け根
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 14:  # 薬指：第2関節
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 15:  # 薬指：第1関節
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 16:  # 薬指：指先
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            cv.circle(image, (landmark_x, landmark_y), 12, (0, 255, 0), 2)
-        if index == 17:  # 小指：付け根
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 18:  # 小指：第2関節
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 19:  # 小指：第1関節
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-        if index == 20:  # 小指：指先
-            cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            cv.circle(image, (landmark_x, landmark_y), 12, (0, 255, 0), 2)
-
-        # if not upper_body_only:
-        if True:
-            cv.putText(image, "z:" + str(round(landmark_z, 3)),
-                       (landmark_x - 10, landmark_y - 10),
-                       cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1,
-                       cv.LINE_AA)
-
-    # 接続線
-    if len(landmark_point) > 0:
-        # 親指
-        cv.line(image, landmark_point[2], landmark_point[3], (0, 255, 0), 2)
-        cv.line(image, landmark_point[3], landmark_point[4], (0, 255, 0), 2)
-
-        # 人差指
-        cv.line(image, landmark_point[5], landmark_point[6], (0, 255, 0), 2)
-        cv.line(image, landmark_point[6], landmark_point[7], (0, 255, 0), 2)
-        cv.line(image, landmark_point[7], landmark_point[8], (0, 255, 0), 2)
-
-        # 中指
-        cv.line(image, landmark_point[9], landmark_point[10], (0, 255, 0), 2)
-        cv.line(image, landmark_point[10], landmark_point[11], (0, 255, 0), 2)
-        cv.line(image, landmark_point[11], landmark_point[12], (0, 255, 0), 2)
-
-        # 薬指
-        cv.line(image, landmark_point[13], landmark_point[14], (0, 255, 0), 2)
-        cv.line(image, landmark_point[14], landmark_point[15], (0, 255, 0), 2)
-        cv.line(image, landmark_point[15], landmark_point[16], (0, 255, 0), 2)
-
-        # 小指
-        cv.line(image, landmark_point[17], landmark_point[18], (0, 255, 0), 2)
-        cv.line(image, landmark_point[18], landmark_point[19], (0, 255, 0), 2)
-        cv.line(image, landmark_point[19], landmark_point[20], (0, 255, 0), 2)
-
-        # 手の平
-        cv.line(image, landmark_point[0], landmark_point[1], (0, 255, 0), 2)
-        cv.line(image, landmark_point[1], landmark_point[2], (0, 255, 0), 2)
-        cv.line(image, landmark_point[2], landmark_point[5], (0, 255, 0), 2)
-        cv.line(image, landmark_point[5], landmark_point[9], (0, 255, 0), 2)
-        cv.line(image, landmark_point[9], landmark_point[13], (0, 255, 0), 2)
-        cv.line(image, landmark_point[13], landmark_point[17], (0, 255, 0), 2)
-        cv.line(image, landmark_point[17], landmark_point[0], (0, 255, 0), 2)
-
-    # 重心 + 左右
-    if len(landmark_point) > 0:
-        cv.circle(image, (cx, cy), 12, (0, 255, 0), 2)
-        cv.putText(image, handedness_str, (cx - 6, cy + 6),
-                   cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2, cv.LINE_AA)
-
-    return image
 
 
 def draw_face_landmarks(image, landmarks):
@@ -732,8 +579,20 @@ def draw_pose_landmarks(
     # upper_body_only,
     visibility_th=0.5,
 ):
-    global basuket_position
-    basuket_position = [100, 100]
+    global nose_position
+    global left_shoulder
+    global right_shoulder
+    global right_elbow
+    global left_elbow
+    global right_hand
+    global left_hand
+    global right_waist
+    global left_waist
+    global right_knee
+    global left_knee
+    global right_ankle
+    global left_ankle
+
     image_width, image_height = image.shape[1], image.shape[0]
 
     landmark_point = []
@@ -749,7 +608,7 @@ def draw_pose_landmarks(
 
         if index == 0:  # 鼻
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
-            basuket_position = (landmark_x, landmark_y)
+            nose_position = [int(landmark_x), int(landmark_y)]
 
         if index == 1:  # 右目：目頭
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
@@ -773,16 +632,22 @@ def draw_pose_landmarks(
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
         if index == 11:  # 右肩
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
+            right_shoulder =  [int(landmark_x), int(landmark_y)]
         if index == 12:  # 左肩
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
+            left_shoulder = [int(landmark_x), int(landmark_y)]
         if index == 13:  # 右肘
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
+            right_elbow  = [int(landmark_x), int(landmark_y)]
         if index == 14:  # 左肘
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
+            left_elbow  = [int(landmark_x), int(landmark_y)]
         if index == 15:  # 右手首
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
+            right_hand  = [int(landmark_x), int(landmark_y)]
         if index == 16:  # 左手首
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
+            left_hand  = [int(landmark_x), int(landmark_y)]
         if index == 17:  # 右手1(外側端)
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
         if index == 18:  # 左手1(外側端)
@@ -797,16 +662,22 @@ def draw_pose_landmarks(
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
         if index == 23:  # 腰(右側)
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
+            right_waist  = [int(landmark_x), int(landmark_y)]
         if index == 24:  # 腰(左側)
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
+            left_waist  = [int(landmark_x), int(landmark_y)]
         if index == 25:  # 右ひざ
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
+            right_knee  = [int(landmark_x), int(landmark_y)]
         if index == 26:  # 左ひざ
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
+            left_knee  = [int(landmark_x), int(landmark_y)]
         if index == 27:  # 右足首
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
+            right_ankle  = [int(landmark_x), int(landmark_y)]
         if index == 28:  # 左足首
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
+            left_ankle  = [int(landmark_x), int(landmark_y)]
         if index == 29:  # 右かかと
             cv.circle(image, (landmark_x, landmark_y), 5, (0, 255, 0), 2)
         if index == 30:  # 左かかと
@@ -1073,10 +944,8 @@ def make_obstacle(x_place, y_place, ball_array, screen, WHITE,BALLSIZE, BALLQUAN
     if(ball_array[i][1][1] < y_place + BALLSIZE and ball_array[i][1][1] > y_place - BALLSIZE  and ball_array[i][1][0] <  x_place + BALLSIZE  and ball_array[i][1][0] >  x_place - BALLSIZE ):
       if(ball_array[i][1][1] < y_place - BALLSIZE + 15 or ball_array[i][1][1] > y_place + BALLSIZE - 15):
         ball_array[i][0][1] = ball_array[i][0][1] * -1
-        print("yが変わった")
       else:
         ball_array[i][0][0] = ball_array[i][0][0] * -1
-        print("xが変わった")
   return ball_array
 
 if __name__ == '__main__':
