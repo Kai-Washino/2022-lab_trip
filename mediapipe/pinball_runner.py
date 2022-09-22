@@ -328,6 +328,14 @@ def main():
             ball_array = make_obstacle(610, 220, ball_array, screen, WHITE, BALLSIZE, BALLQUANTITY)
             ball_array = make_obstacle(580, 320, ball_array, screen, WHITE, BALLSIZE, BALLQUANTITY)
 
+            #ボール同士の当たり
+            for i in range(BALLQUANTITY-1):
+                for j in range(BALLQUANTITY-2-i):
+                    distance = abs(ball_array[i][1][1] - ball_array[i+j+1][1][1]) + abs(ball_array[i][1][0] - ball_array[i+j+1][1][0])
+                    if(distance < 100):
+                        ball_array[i][0][0] = -ball_array[i][0][0]
+                        ball_array[i+j+1][0][0] = -ball_array[i+j+1][0][0]
+
             # 当たり判定
             for i in range(BALLQUANTITY):
                 if(ball_array[i][1][1]-30 < y_paddle and (ball_array[i][1][1]+30)+30 > y_paddle and ball_array[i][1][0] + 30 >= (x_paddle-10) and ball_array[i][1][0] - 30 <=(x_paddle+115)):
