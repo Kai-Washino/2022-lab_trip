@@ -168,7 +168,8 @@ def main():
     #ball_array[ボールの番号][ボールの画像の名前，ボールのベクトル，ボールの位置][x,y もしくは画像，音]
     
     # カメラ準備 ###############################################################
-    cap = cv.VideoCapture(cap_device)
+    cap = cv.VideoCapture(1, cv.CAP_DSHOW)
+    print(cap_device)
     cap.set(cv.CAP_PROP_FRAME_WIDTH, cap_width)
     cap.set(cv.CAP_PROP_FRAME_HEIGHT, cap_height)
 
