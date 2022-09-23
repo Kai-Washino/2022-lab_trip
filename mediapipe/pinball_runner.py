@@ -135,7 +135,9 @@ def main():
     ohnishi_goal = pygame.mixer.Sound("materials//ohnishi.wav")
     tsuchida_goal = pygame.mixer.Sound("materials//tsuchida.wav")
     gold_goal = pygame.mixer.Sound("materials//gold_goal.wav")
-    fever_sound = pygame.mixer.Sound("materials//fever.wav")
+    fever_sound = pygame.mixer.Sound("materials//fever_v2.wav")
+    # fever_sound.set_volume(1)
+    # fever_sound.play(0)
     feverend_sound = pygame.mixer.Sound("materials//feverend.wav")
 
     tsukamoto = pygame.image.load("materials//tsukamoto.png")
@@ -159,13 +161,15 @@ def main():
     ball_array = []
     fever_flag = False
     game_start = False
+    feverstart_sound = False
+    fevergoal_sound = False
 
     for i in range(BALLQUANTITY):
         ball_array.append([[10, 10], [10, 10], [ohnishi, ohnishi_goal]])
     # ball_array[ボールの番号][ボールの画像の名前，ボールのベクトル，ボールの位置][x,y もしくは画像，音]
     
     # カメラ準備 ###############################################################
-    cap = cv.VideoCapture(1, cv.CAP_DSHOW)
+    cap = cv.VideoCapture(0, cv.CAP_DSHOW)
     cap.set(cv.CAP_PROP_FRAME_WIDTH, cap_width)
     cap.set(cv.CAP_PROP_FRAME_HEIGHT, cap_height)
 
@@ -273,16 +277,20 @@ def main():
             # フィーバータイム
             fever_time = time.time() - fever_start
             if(fever_time < 3):
-                screen.blit(fever, (100, 0))
-                fever_sound.play(0)
-                temp = BALLQUANTITY
-                BALLQUANTITY = 50
-                for i in range(BALLQUANTITY - temp):
-                    ball_array.append([[10, 10], [10, 10], [ohnishi, ohnishi_goal]])
+                screen.blit(fever, (50, 0))
+                if(fever_time < 1 and not feverstart_sound):
+                    fever_sound.play(0)
+                    feverstart_sound = True
+                    temp = BALLQUANTITY
+                    BALLQUANTITY = 50
+                    for i in range(BALLQUANTITY - temp):
+                        ball_array.append([[10, 10], [10, 10], [ohnishi, ohnishi_goal]])
             elif(fever_time > 18):
-                screen.blit(feverend, (100, 100))
-                feverend_sound.play(0)
-                BALLQUANTITY = 2
+                screen.blit(feverend, (50, 0))
+                if(fever_time > 20 and not fevergoal_sound):
+                    feverend_sound.play(0)
+                    BALLQUANTITY = 2
+                    fevergoal_sound = True
                 if(fever_time > 21):
                     fever_flag = False
         elif(rest_time <= 0):
@@ -361,11 +369,12 @@ def main():
                     else: score += 1
 
                     ball_array[i][1][0] = random.randrange(700)
-                    ball_array[i][1][1] = 10
+                    ball_array[i][1][1] = 80
                     ball_array[i][0][0] = BALLSPEED * (random.randrange(0, 3, 2) - 1)
                     ball_array[i][0][1] = BALLSPEED
 
                     if(rest_time <= 30 and ball_count % 10 == 0 and not fever_flag):
+                    # if(rest_time <= 100):
                         ball_array[i][2][0] = gold
                         ball_array[i][2][1] = gold_goal
                     elif(ball_count % 15 == 0):
@@ -390,6 +399,7 @@ def main():
                     ball_count += 1
 
                     if(rest_time <= 30 and ball_count % 10 == 0 and not fever_flag):
+                    # if(rest_time <= 100):
                         ball_array[i][2][0] = gold
                         ball_array[i][2][1] = gold_goal
                     elif(ball_count % 15 == 0):
@@ -406,15 +416,15 @@ def main():
                         ball_array[i][2][1] = tsuchida_goal
 
                 # 壁に反射
-                if(ball_array[i][1][0] >= 700): 
+                if(ball_array[i][1][0] > 700): 
                     ball_array[i][0][0] = -BALLSPEED
                     bound.play(0)
-                if(ball_array[i][1][0] <= 0): 
+                if(ball_array[i][1][0] < 0): 
                     ball_array[i][0][0] = BALLSPEED
                     bound.play(0)
-                if(ball_array[i][1][1] <= 80):
-                    ball_array[i][0][1] = BALLSPEED
+                if(ball_array[i][1][1] < 80):
                     bound.play(0)
+                    ball_array[i][0][1] = BALLSPEED
                 ball_array[i][1][0] += ball_array[i][0][0]
                 ball_array[i][1][1] += ball_array[i][0][1]
                 # pygame.draw.circle(screen, WHITE, (ball_array[i][1][0], ball_array[i][1][1]), BALLSIZE)
